@@ -1,10 +1,11 @@
+import { addTodo, deleteTodo, toggleTodo } from "./todo-logic.js";
 import { renderTodos } from "./render.js";
 
 const form = document.querySelector("form");
 const input = document.querySelector("input");
 const listEl = document.querySelector("ul");
 
-let todos = JSON.parse(localStorage.getItem("todos") || "[]");
+let todos = JSON.parse(localStorage.getItem("todos")) || [];
 
 function saveAndRender() {
   localStorage.setItem("todos", JSON.stringify(todos));
@@ -14,9 +15,7 @@ function saveAndRender() {
 if (form) {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const text = input.value.trim();
-    if (!text) return;
-    todos.push({ text, done: false });
+    todos = addTodo(todos, input.value);
     input.value = "";
     saveAndRender();
   });
@@ -24,8 +23,15 @@ if (form) {
 
 if (listEl) {
   listEl.addEventListener("click", (e) => {
-    if (e.target.classList.contains("delete-btn")) {
-      todos.splice(Number(e.target.dataset.index), 1);
+    const delBtn = e.target.closest(".delete-btn");
+    if (delBtn) {
+      todos = deleteTodo(todos, Number(delBtn.dataset.id));
+      saveAndRender();
+      return;
+    }
+    const li = e.target.closest("li");
+    if (li) {
+      todos = toggleTodo(todos, Number(li.dataset.id));
       saveAndRender();
     }
   });
